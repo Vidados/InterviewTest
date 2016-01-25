@@ -5,16 +5,16 @@ namespace InterviewTest.Services
 {
     public class TripService : ITripService
     {
-        private readonly IFileSystemDatabase _fileSystemDatabase;
+        private readonly IDatabase _database;
 
-        public TripService(IFileSystemDatabase fileSystemDatabase)
+        public TripService(IDatabase database)
         {
-            _fileSystemDatabase = fileSystemDatabase;
+            _database = database;
         }
 
         public Trip GetById(string id)
         {
-            return _fileSystemDatabase.Get<Trip>(id);
+            return _database.Get<Trip>(id);
         }
     }
 }

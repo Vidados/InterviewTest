@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace InterviewTest.Database
 {
-    public class FileSystemDatabase: IFileSystemDatabase
+    public class FileSystemDatabase: IDatabase
     {
         private const string Root = @"c:\temp\VidadosDB";
 
@@ -27,7 +27,8 @@ namespace InterviewTest.Database
 
             return Directory.GetFiles(GetFolder<T>()).Select(Deserialise<T>).ToList();
         }
-
+        
+        
         public void Save<T>(T obj) where T : IPersistable
         {
             var folder = GetFolder<T>();
@@ -74,7 +75,7 @@ namespace InterviewTest.Database
         private static string GetFolder<T>() => Path.Combine(Root, typeof(T).Name);
         private static string GetFqFilename<T>(string id) => Path.Combine(GetFolder<T>(), id + ".json");
 
-        T IFileSystemDatabase.Deserialise<T>(string fqFilename)
+        T IDatabase.Deserialise<T>(string fqFilename)
         {
             throw new NotImplementedException();
         }

@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace InterviewTest.Database
 {
-    public interface IFileSystemDatabase
+    public interface IDatabase
     {
         T Get<T>(string id) where T : class;
 

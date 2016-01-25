@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using InterviewTest.Models;
 
-namespace InterviewTest.Controllers
+namespace InterviewTest.ViewModels
 {
     public class NewsletterListViewModel
     {

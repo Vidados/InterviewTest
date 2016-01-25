@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 
-namespace InterviewTest.Controllers
+namespace InterviewTest.ViewModels
 {
     public class NewsletterViewModel
     {
-        public List<object> Items { get; set; } = new List<object>();
+        public List<INewsletterItem> Items { get; set; } = new List<INewsletterItem>();
     }
 }

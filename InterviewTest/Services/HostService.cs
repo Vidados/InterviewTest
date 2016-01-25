@@ -5,16 +5,16 @@ namespace InterviewTest.Services
 {
     public class HostService : IHostService
     {
-        private readonly IFileSystemDatabase _fileSystemDatabase;
+        private readonly IDatabase _database;
 
-        public HostService(IFileSystemDatabase fileSystemDatabase)
+        public HostService(IDatabase database)
         {
-            _fileSystemDatabase = fileSystemDatabase;
+            _database = database;
         }
 
         public Host GetById(string id)
         {
-            return _fileSystemDatabase.Get<Host>(id);
+            return _database.Get<Host>(id);
         }
     }
 }

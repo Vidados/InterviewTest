@@ -1,6 +1,6 @@
-namespace InterviewTest.Controllers
+namespace InterviewTest.ViewModels
 {
-    public class NewsletterTripViewModel
+    public class NewsletterTripViewModel : INewsletterItem
     {
         public string Name { get; set; }
         public decimal Price { get; set; }

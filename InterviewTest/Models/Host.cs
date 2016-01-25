@@ -2,7 +2,7 @@
 
 namespace InterviewTest.Models
 {
-    public class Host : IPersistable
+    public class Host : IPersistable, IContent
     {
         public string Id { get; set; }
         public string Name { get; set; }

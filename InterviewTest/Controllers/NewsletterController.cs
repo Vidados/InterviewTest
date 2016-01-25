@@ -6,6 +6,7 @@ using InterviewTest.Database;
 using InterviewTest.Extensions;
 using InterviewTest.Models;
 using InterviewTest.Services;
+using InterviewTest.ViewModels;
 
 namespace InterviewTest.Controllers
 {
@@ -15,18 +16,19 @@ namespace InterviewTest.Controllers
         private readonly IHostService _hostService;
         private readonly ITripService _tripService;
 
-        public NewsletterController(INewsletterService newsletterService, IHostService hostService, ITripService tripService)
+        public NewsletterController(INewsletterService newsletterService, IHostService hostService,
+            ITripService tripService)
         {
             _newsletterService = newsletterService;
             _hostService = hostService;
             _tripService = tripService;
         }
 
-        public ActionResult Create(int count)
+        public ActionResult Create(int count, string pattern)
         {
-            _newsletterService.CreateRandomData(count);
-            TempData["notification"] = $"Created {count} newsletters";
-
+            _newsletterService.CreateRandomData(count, pattern);
+            TempData["notification"] = $"Created {count} newsletters in pattern {pattern}";
+            
             return RedirectToAction("list");
         }
 
@@ -43,11 +45,13 @@ namespace InterviewTest.Controllers
         {
             var newsletter = _newsletterService.GetById(id);
 
+            if (newsletter == null)
+                return RedirectToAction("list");
+
+            var contents = _newsletterService.GetContents(newsletter);
             var viewModel = new NewsletterViewModel
             {
-                Items = newsletter.TripIds.Select(tid => Convert(_tripService.GetById(tid))).Cast<object>()
-                    .Union(newsletter.HostIds.Select(hid => Convert(_hostService.GetById(hid))))
-                    .ToList(),
+                Items = contents.Select(item => Convert(item)).ToList()
             };
 
             return View("Newsletter", viewModel);
@@ -79,20 +83,45 @@ namespace InterviewTest.Controllers
             return View(viewModel);
         }
 
-        private NewsletterHostViewModel Convert(Host host) => new NewsletterHostViewModel
+        private INewsletterItem Convert(IContent content, string hostName = null)
         {
-            Name = host.Name,
-            ImageUrl = host.ImageUrl,
-            Job = host.Job,
-        };
-        
-        private NewsletterTripViewModel Convert(Trip trip, string hostName = null) => new NewsletterTripViewModel
-        {
-            Name = trip.Name,
-            Country = trip.Country,
-            HostName = hostName ?? _hostService.GetById(trip.HostId)?.Name,
-            ImageUrl = trip.ImageUrl,
-        };
-        
+            var host = content as Host;
+            var trip = content as Trip;
+            if (host != null)
+            {
+                return new NewsletterHostViewModel
+                {
+                    Name = host.Name,
+                    ImageUrl = host.ImageUrl,
+                    Job = host.Job,
+                };
+            }
+            else if (trip != null)
+            {
+                return new NewsletterTripViewModel
+                {
+                    Name = trip.Name,
+                    Country = trip.Country,
+                    HostName = hostName ?? _hostService.GetById(trip.HostId)?.Name,
+                    ImageUrl = trip.ImageUrl,
+                };
+            }
+            return null;
+        }
+
+        //private NewsletterHostViewModel Convert(Host host) => new NewsletterHostViewModel
+        //{
+        //    Name = host.Name,
+        //    ImageUrl = host.ImageUrl,
+        //    Job = host.Job,
+        //};
+
+        //private NewsletterTripViewModel Convert(Trip trip, string hostName = null) => new NewsletterTripViewModel
+        //{
+        //    Name = trip.Name,
+        //    Country = trip.Country,
+        //    HostName = hostName ?? _hostService.GetById(trip.HostId)?.Name,
+        //    ImageUrl = trip.ImageUrl,
+        //};
     }
 }

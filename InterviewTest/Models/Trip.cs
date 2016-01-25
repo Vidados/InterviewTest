@@ -2,7 +2,7 @@
 
 namespace InterviewTest.Models
 {
-    public class Trip : IPersistable
+    public class Trip : IPersistable, IContent
     {
         public string Id { get; set; }
         public string Name { get; set; }

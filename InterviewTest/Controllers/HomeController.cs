@@ -16,7 +16,7 @@ namespace InterviewTest.Controllers
             return View();
         }
 
-        private FileSystemDatabase GetDatabase() => new FileSystemDatabase();
+        private Database.FileSystemDatabase GetDatabase() => new Database.FileSystemDatabase();
         private static readonly Random _random = new Random();
 
         public ActionResult CreateTripsAndSellers()

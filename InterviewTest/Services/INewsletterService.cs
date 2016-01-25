@@ -6,10 +6,10 @@ namespace InterviewTest.Services
 {
     public interface INewsletterService
     {
-        void CreateRandomData(int count);
+        void CreateRandomData(int count, string pattern);
         void DeleteAll();
         Newsletter GetById(string id);
         List<Newsletter> GetAll();
-
+        List<IContent> GetContents(Newsletter newsletter);
     }
 }

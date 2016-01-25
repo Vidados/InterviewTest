@@ -1,6 +1,6 @@
 using InterviewTest.Database;
 
-namespace InterviewTest.Controllers
+namespace InterviewTest.Models
 {
     public class User : IPersistable
     {

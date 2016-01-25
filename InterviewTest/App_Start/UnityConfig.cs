@@ -3,9 +3,8 @@ using InterviewTest.Controllers;
 using InterviewTest.Database;
 using InterviewTest.Services;
 using Microsoft.Practices.Unity;
-using Microsoft.Practices.Unity.Configuration;
 
-namespace InterviewTest.App_Start
+namespace InterviewTest
 {
     /// <summary>
     /// Specifies the Unity configuration for the main container.
@@ -39,10 +38,10 @@ namespace InterviewTest.App_Start
             // container.LoadConfiguration();
 
             container.RegisterType<INewsletterService, NewsletterService>(
-                new InjectionConstructor(typeof(FileSystemDatabase)));
+                new InjectionConstructor(typeof(Database.FileSystemDatabase)));
             container.RegisterType<IHostService, HostService>();
             container.RegisterType<ITripService, TripService>();
-            container.RegisterType<IFileSystemDatabase, FileSystemDatabase>();
+            container.RegisterType<IDatabase, Database.FileSystemDatabase>();
 
             container.Resolve<NewsletterController>();
         }
