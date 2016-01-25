@@ -16,7 +16,7 @@ namespace InterviewTest.Controllers
             return View();
         }
 
-        private FileSystemDatabase GetDatabase() => new FileSystemDatabase();
+        private Database.FileSystemDatabase GetDatabase() => new Database.FileSystemDatabase();
         private static readonly Random _random = new Random();
 
         public ActionResult CreateTripsAndSellers()
@@ -83,16 +83,5 @@ namespace InterviewTest.Controllers
 
             return RedirectToAction("account");
         }
-    }
-
-    public class AccountViewModel
-    {
-        public string Name { get; set; }
-    }
-
-    public class User : IPersistable
-    {
-        public string Name { get; set; }
-        public string Id { get; set; }
     }
 }

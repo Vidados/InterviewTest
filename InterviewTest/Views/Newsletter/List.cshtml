@@ -1,4 +1,4 @@
-﻿@model InterviewTest.Controllers.NewsletterListViewModel
+﻿@model InterviewTest.ViewModels.NewsletterListViewModel
 
 @{
     ViewBag.Title = "Saved newsletters";
@@ -15,6 +15,7 @@
             {
                 <h2>Create newsletters</h2>
                 <label>How many <input type="number" name="count" value="10"/></label>
+                <label>Newsletter pattern <input type="input" name="pattern" value="HHHTTHHH" /></label>
                 <button class="btn btn-default" type="submit">Create newsletters</button>
             }
         </div>

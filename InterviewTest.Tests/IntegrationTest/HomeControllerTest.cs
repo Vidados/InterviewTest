@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Web.Mvc;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using InterviewTest;
+﻿using System.Web.Mvc;
 using InterviewTest.Controllers;
+using NUnit.Framework;
 
-namespace InterviewTest.Tests.Controllers
+namespace InterviewTest.Tests.IntegrationTest
 {
-    [TestClass]
+    [TestFixture]
     public class HomeControllerTest
     {
-        [TestMethod]
+
+
+        [Test]
         public void Index()
         {
             // Arrange

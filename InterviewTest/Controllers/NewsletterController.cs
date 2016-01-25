@@ -1,42 +1,40 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using InterviewTest.Database;
 using InterviewTest.Extensions;
 using InterviewTest.Models;
+using InterviewTest.Services;
+using InterviewTest.ViewModels;
 
 namespace InterviewTest.Controllers
 {
     public class NewsletterController : Controller
     {
-        public ActionResult Create(int count)
+        private readonly INewsletterService _newsletterService;
+        private readonly IHostService _hostService;
+        private readonly ITripService _tripService;
+
+        public NewsletterController(INewsletterService newsletterService, IHostService hostService,
+            ITripService tripService)
         {
-            var db = GetDatabase();
+            _newsletterService = newsletterService;
+            _hostService = hostService;
+            _tripService = tripService;
+        }
 
-            var hostIds = db.GetAll<Host>().Select(h => h.Id).ToArray();
-            var tripIds = db.GetAll<Trip>().Select(t => t.Id).ToArray();
-
-            for (int i = 0; i < count; i++)
-            {
-                var newsletter = new Newsletter()
-                {
-                    HostIds = Enumerable.Range(0, 2).Select(x => hostIds.GetRandom()).ToList(),
-                    TripIds = Enumerable.Range(0, 2).Select(x => tripIds.GetRandom()).ToList(),
-                };
-
-                db.Save(newsletter);
-            }
-
-            TempData["notification"] = $"Created {count} newsletters";
-
+        public ActionResult Create(int count, string pattern)
+        {
+            _newsletterService.CreateRandomData(count, pattern);
+            TempData["notification"] = $"Created {count} newsletters in pattern {pattern}";
+            
             return RedirectToAction("list");
         }
 
         public ActionResult DeleteAll()
         {
-            GetDatabase().DeleteAll<Newsletter>();
+            _newsletterService.DeleteAll();
 
             TempData["notification"] = "All newsletters deleted";
 
@@ -45,15 +43,15 @@ namespace InterviewTest.Controllers
 
         public ActionResult Display(string id)
         {
-            var db = GetDatabase();
+            var newsletter = _newsletterService.GetById(id);
 
-            var newsletter = db.Get<Newsletter>(id);
+            if (newsletter == null)
+                return RedirectToAction("list");
 
+            var contents = _newsletterService.GetContents(newsletter);
             var viewModel = new NewsletterViewModel
             {
-                Items = newsletter.TripIds.Select(tid => Convert(db.Get<Trip>(tid))).Cast<object>()
-                    .Union(newsletter.HostIds.Select(hid => Convert(db.Get<Host>(hid))))
-                    .ToList(),
+                Items = contents.Select(item => Convert(item)).ToList()
             };
 
             return View("Newsletter", viewModel);
@@ -79,54 +77,51 @@ namespace InterviewTest.Controllers
         {
             var viewModel = new NewsletterListViewModel
             {
-                Newsletters = GetDatabase().GetAll<Newsletter>(),
+                Newsletters = _newsletterService.GetAll(),
             };
 
             return View(viewModel);
         }
 
-        private NewsletterHostViewModel Convert(Host host) => new NewsletterHostViewModel
+        private INewsletterItem Convert(IContent content, string hostName = null)
         {
-            Name = host.Name,
-            ImageUrl = host.ImageUrl,
-            Job = host.Job,
-        };
-        
-        private NewsletterTripViewModel Convert(Trip trip, string hostName = null) => new NewsletterTripViewModel
-        {
-            Name = trip.Name,
-            Country = trip.Country,
-            HostName = hostName ?? GetDatabase().Get<Host>(trip.HostId)?.Name,
-            ImageUrl = trip.ImageUrl,
-        };
+            var host = content as Host;
+            var trip = content as Trip;
+            if (host != null)
+            {
+                return new NewsletterHostViewModel
+                {
+                    Name = host.Name,
+                    ImageUrl = host.ImageUrl,
+                    Job = host.Job,
+                };
+            }
+            else if (trip != null)
+            {
+                return new NewsletterTripViewModel
+                {
+                    Name = trip.Name,
+                    Country = trip.Country,
+                    HostName = hostName ?? _hostService.GetById(trip.HostId)?.Name,
+                    ImageUrl = trip.ImageUrl,
+                };
+            }
+            return null;
+        }
 
-        private FileSystemDatabase GetDatabase() => new FileSystemDatabase();
-        
-    }
+        //private NewsletterHostViewModel Convert(Host host) => new NewsletterHostViewModel
+        //{
+        //    Name = host.Name,
+        //    ImageUrl = host.ImageUrl,
+        //    Job = host.Job,
+        //};
 
-    public class NewsletterViewModel
-    {
-        public List<object> Items { get; set; } = new List<object>();
-    }
-
-    public class NewsletterTripViewModel
-    {
-        public string Name { get; set; }
-        public decimal Price { get; set; }
-        public string Country { get; set; }
-        public string HostName { get; set; }
-        public string ImageUrl { get; set; }
-    }
-
-    public class NewsletterHostViewModel
-    {
-        public string Name { get; set; }
-        public string Job { get; set; }
-        public string ImageUrl { get; set; }
-    }
-
-    public class NewsletterListViewModel
-    {
-        public List<Newsletter> Newsletters { get; set; }
+        //private NewsletterTripViewModel Convert(Trip trip, string hostName = null) => new NewsletterTripViewModel
+        //{
+        //    Name = trip.Name,
+        //    Country = trip.Country,
+        //    HostName = hostName ?? _hostService.GetById(trip.HostId)?.Name,
+        //    ImageUrl = trip.ImageUrl,
+        //};
     }
 }
