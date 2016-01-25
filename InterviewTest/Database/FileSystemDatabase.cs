@@ -1,17 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Newtonsoft.Json;
 
 namespace InterviewTest.Database
 {
-    public class FileSystemDatabase
+    public class FileSystemDatabase: IFileSystemDatabase
     {
-        public const string Root = @"c:\temp\VidadosDB";
+        private const string Root = @"c:\temp\VidadosDB";
 
         public T Get<T>(string id) where T : class
         {
-            var fqFilename = GetFQFilename<T>(id);
+            var fqFilename = GetFqFilename<T>(id);
 
             if (!File.Exists(fqFilename))
                 return null;
@@ -44,7 +45,7 @@ namespace InterviewTest.Database
 
             var serialisedObject = JsonConvert.SerializeObject(obj);
 
-            using (var sw = new StreamWriter(GetFQFilename<T>(obj.Id)))
+            using (var sw = new StreamWriter(GetFqFilename<T>(obj.Id)))
             {
                 if (!Directory.Exists(folder))
                     Directory.CreateDirectory(folder);
@@ -71,6 +72,11 @@ namespace InterviewTest.Database
         }
 
         private static string GetFolder<T>() => Path.Combine(Root, typeof(T).Name);
-        private static string GetFQFilename<T>(string id) => Path.Combine(GetFolder<T>(), id + ".json");
+        private static string GetFqFilename<T>(string id) => Path.Combine(GetFolder<T>(), id + ".json");
+
+        T IFileSystemDatabase.Deserialise<T>(string fqFilename)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

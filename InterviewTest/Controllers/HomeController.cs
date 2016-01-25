@@ -84,15 +84,4 @@ namespace InterviewTest.Controllers
             return RedirectToAction("account");
         }
     }
-
-    public class AccountViewModel
-    {
-        public string Name { get; set; }
-    }
-
-    public class User : IPersistable
-    {
-        public string Name { get; set; }
-        public string Id { get; set; }
-    }
 }

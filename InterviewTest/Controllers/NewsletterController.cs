@@ -1,34 +1,30 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using InterviewTest.Database;
 using InterviewTest.Extensions;
 using InterviewTest.Models;
+using InterviewTest.Services;
 
 namespace InterviewTest.Controllers
 {
     public class NewsletterController : Controller
     {
+        private readonly INewsletterService _newsletterService;
+        private readonly IHostService _hostService;
+        private readonly ITripService _tripService;
+
+        public NewsletterController(INewsletterService newsletterService, IHostService hostService, ITripService tripService)
+        {
+            _newsletterService = newsletterService;
+            _hostService = hostService;
+            _tripService = tripService;
+        }
+
         public ActionResult Create(int count)
         {
-            var db = GetDatabase();
-
-            var hostIds = db.GetAll<Host>().Select(h => h.Id).ToArray();
-            var tripIds = db.GetAll<Trip>().Select(t => t.Id).ToArray();
-
-            for (int i = 0; i < count; i++)
-            {
-                var newsletter = new Newsletter()
-                {
-                    HostIds = Enumerable.Range(0, 2).Select(x => hostIds.GetRandom()).ToList(),
-                    TripIds = Enumerable.Range(0, 2).Select(x => tripIds.GetRandom()).ToList(),
-                };
-
-                db.Save(newsletter);
-            }
-
+            _newsletterService.CreateRandomData(count);
             TempData["notification"] = $"Created {count} newsletters";
 
             return RedirectToAction("list");
@@ -36,7 +32,7 @@ namespace InterviewTest.Controllers
 
         public ActionResult DeleteAll()
         {
-            GetDatabase().DeleteAll<Newsletter>();
+            _newsletterService.DeleteAll();
 
             TempData["notification"] = "All newsletters deleted";
 
@@ -45,14 +41,12 @@ namespace InterviewTest.Controllers
 
         public ActionResult Display(string id)
         {
-            var db = GetDatabase();
-
-            var newsletter = db.Get<Newsletter>(id);
+            var newsletter = _newsletterService.GetById(id);
 
             var viewModel = new NewsletterViewModel
             {
-                Items = newsletter.TripIds.Select(tid => Convert(db.Get<Trip>(tid))).Cast<object>()
-                    .Union(newsletter.HostIds.Select(hid => Convert(db.Get<Host>(hid))))
+                Items = newsletter.TripIds.Select(tid => Convert(_tripService.GetById(tid))).Cast<object>()
+                    .Union(newsletter.HostIds.Select(hid => Convert(_hostService.GetById(hid))))
                     .ToList(),
             };
 
@@ -79,7 +73,7 @@ namespace InterviewTest.Controllers
         {
             var viewModel = new NewsletterListViewModel
             {
-                Newsletters = GetDatabase().GetAll<Newsletter>(),
+                Newsletters = _newsletterService.GetAll(),
             };
 
             return View(viewModel);
@@ -96,37 +90,9 @@ namespace InterviewTest.Controllers
         {
             Name = trip.Name,
             Country = trip.Country,
-            HostName = hostName ?? GetDatabase().Get<Host>(trip.HostId)?.Name,
+            HostName = hostName ?? _hostService.GetById(trip.HostId)?.Name,
             ImageUrl = trip.ImageUrl,
         };
-
-        private FileSystemDatabase GetDatabase() => new FileSystemDatabase();
         
-    }
-
-    public class NewsletterViewModel
-    {
-        public List<object> Items { get; set; } = new List<object>();
-    }
-
-    public class NewsletterTripViewModel
-    {
-        public string Name { get; set; }
-        public decimal Price { get; set; }
-        public string Country { get; set; }
-        public string HostName { get; set; }
-        public string ImageUrl { get; set; }
-    }
-
-    public class NewsletterHostViewModel
-    {
-        public string Name { get; set; }
-        public string Job { get; set; }
-        public string ImageUrl { get; set; }
-    }
-
-    public class NewsletterListViewModel
-    {
-        public List<Newsletter> Newsletters { get; set; }
     }
 }
