@@ -53,6 +53,7 @@ namespace InterviewTest.Database
             }
         }
 
+    
         public void DeleteAll<T>()
         {
             Directory.Delete(GetFolder<T>(), true);

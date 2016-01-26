@@ -14,13 +14,37 @@
             @using (Html.BeginForm("create", "Newsletter", FormMethod.Post))
             {
                 <h2>Create newsletters</h2>
-                <label>How many <input type="number" name="count" value="10"/></label>
+                <label>How many <input type="number" name="count" value="10" /></label>
+                <label>Format (T=trip, H=Host) <input type="text" name="formatter" value="@Model.setString" maxlength="9"/>
+            
+            </label>
+                <p>Example TTTHHTTT fr 3 trips, 2 hosts, 3 trips.</p>
                 <button class="btn btn-default" type="submit">Create newsletters</button>
             }
         </div>
         <div class="row">
             <h2>View sample newsletter</h2>
             <a href="@Url.Action("sample", "newsletter")" class="btn btn-default">View</a>
+        </div>
+        <div class="list">
+            <p>Trips used</p>
+            <ul> 
+                @foreach(string v in Model.res)
+                {
+                    <li>@v</li>
+                }
+                    
+            </ul>
+        </div>
+        <div class="list">
+            <p>Hosts used</p>
+            <ul>
+                @foreach (string v in Model.res2)
+                {
+                    <li>@v</li>
+                }
+
+            </ul>
         </div>
     </div>
     
