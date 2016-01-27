@@ -23,6 +23,14 @@ namespace InterviewTest.Controllers
         {
             var database = GetDatabase();
 
+            var lay = EntityGenerator.GenerateL();
+            lay.Id = "00000";
+            database.Save(lay);
+
+            var St = EntityGenerator.GenerateS();
+            St.Id = "00000";
+            database.Save(St);
+
             for (int i = 0; i < 10; i++)
             {
                 var host = EntityGenerator.GenerateHost();

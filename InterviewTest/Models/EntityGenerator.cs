@@ -1,16 +1,31 @@
 ﻿using System;
 using System.Linq;
+using System.Collections.Generic;
 using InterviewTest.Extensions;
 
 namespace InterviewTest.Models
 {
     public static class EntityGenerator
     {
+        public static splitsText GenerateS() => new splitsText
+        {
+            layoutString = "TTHHTT",
+            Id = "00000",
+        };
+
+        public static Layoutsplits GenerateL() => new Layoutsplits
+        {
+            layoutOf = new List<List<string>>(),
+            Id="00000",
+        };
+
         public static Host GenerateHost() => new Host
         {
             Name = $"{FirstNames.GetRandom()} {LastNames.GetRandom()}",
             Job = $"{Jobs1.GetRandom()} {Jobs2.GetRandom()}",
             ImageUrl = ImageUrls.GetRandom(),
+            used=0,
+            addclass="",
         };
 
         public static Trip GenerateTrip(string hostId) => new Trip
@@ -19,6 +34,8 @@ namespace InterviewTest.Models
             Country = Countries.GetRandom(),
             HostId = hostId,
             ImageUrl = ImageUrls.GetRandom(),
+            used=0,
+            addclass="",
         };
         
         private static string[] Countries => new[] { "France", "Italy", "Portugal", "Spain", "USA" };
