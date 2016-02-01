@@ -11,6 +11,7 @@ namespace InterviewTest.Models
             Name = $"{FirstNames.GetRandom()} {LastNames.GetRandom()}",
             Job = $"{Jobs1.GetRandom()} {Jobs2.GetRandom()}",
             ImageUrl = ImageUrls.GetRandom(),
+            NewsletterCount = new Random().Next(0,99999)
         };
 
         public static Trip GenerateTrip(string hostId) => new Trip
@@ -19,8 +20,9 @@ namespace InterviewTest.Models
             Country = Countries.GetRandom(),
             HostId = hostId,
             ImageUrl = ImageUrls.GetRandom(),
+            NewsletterCount = new Random().Next(0, 99999)
         };
-        
+
         private static string[] Countries => new[] { "France", "Italy", "Portugal", "Spain", "USA" };
         private static string[] Activities => new[] { "Surf", "Cookery", "Painting", "Knitting" };
         private static string[] TripTypes => new[] { "Holiday", "Trip", "Retreat", "Experience" };
