@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using InterviewTest.Database;
-using InterviewTest.Extensions;
 using InterviewTest.Models;
+using InterviewTest.Helpers;
 
 namespace InterviewTest.Controllers
 {
@@ -15,18 +13,23 @@ namespace InterviewTest.Controllers
         {
             var db = GetDatabase();
 
-            var hostIds = db.GetAll<Host>().Select(h => h.Id).ToArray();
-            var tripIds = db.GetAll<Trip>().Select(t => t.Id).ToArray();
-
+            //use default layout if no settings have been defined yet
+            var settings = SettingsHelper.GetSettings(db);
+            var totalHosts = settings.Layout.Count(x => x == NewsletterItem.Host);
+            var totalTrips = settings.Layout.Count - totalHosts;
+            var stats = db.GetAll<Stats>().LastOrDefault();
+            
             for (int i = 0; i < count; i++)
             {
                 var newsletter = new Newsletter()
                 {
-                    HostIds = Enumerable.Range(0, 2).Select(x => hostIds.GetRandom()).ToList(),
-                    TripIds = Enumerable.Range(0, 2).Select(x => tripIds.GetRandom()).ToList(),
+                    HostIds = GetFairAllocation(stats, NewsletterItem.Host, totalHosts),
+                    TripIds = GetFairAllocation(stats, NewsletterItem.Trip, totalTrips),
+                    SettingsId = settings.Id
                 };
 
                 db.Save(newsletter);
+                db.Save(stats);
             }
 
             TempData["notification"] = $"Created {count} newsletters";
@@ -48,13 +51,25 @@ namespace InterviewTest.Controllers
             var db = GetDatabase();
 
             var newsletter = db.Get<Newsletter>(id);
+            var settings = SettingsHelper.GetSettings(db, newsletter.SettingsId);
 
-            var viewModel = new NewsletterViewModel
+            var viewModel = new NewsletterViewModel();
+            var tidx = 0;
+            var hidx = 0;
+
+            foreach (var item in settings.Layout)
             {
-                Items = newsletter.TripIds.Select(tid => Convert(db.Get<Trip>(tid))).Cast<object>()
-                    .Union(newsletter.HostIds.Select(hid => Convert(db.Get<Host>(hid))))
-                    .ToList(),
-            };
+                if (item == NewsletterItem.Trip)
+                {
+                    var tid = newsletter.TripIds.ElementAt(tidx++);
+                    viewModel.Items.Add(Convert(db.Get<Trip>(tid)));
+                }
+                else
+                {
+                    var hid = newsletter.HostIds.ElementAt(hidx++);
+                    viewModel.Items.Add(Convert(db.Get<Host>(hid)));
+                }
+            }
 
             return View("Newsletter", viewModel);
         }
@@ -99,6 +114,26 @@ namespace InterviewTest.Controllers
             HostName = hostName ?? GetDatabase().Get<Host>(trip.HostId)?.Name,
             ImageUrl = trip.ImageUrl,
         };
+
+        private List<string> GetFairAllocation(Stats stats, NewsletterItem type, int total)
+        {
+            var featured = type == NewsletterItem.Trip ? stats.Trips : stats.Hosts;
+            var allocation = featured.OrderBy(x => x.Value).Select(x => x.Key).Take(total).ToList();
+
+            foreach(var id in allocation)
+            {
+                if(type == NewsletterItem.Trip)
+                {
+                    stats.Trips[id]++;
+                }
+                else
+                {
+                    stats.Hosts[id]++;
+                }
+            }
+
+            return allocation;
+        }
 
         private FileSystemDatabase GetDatabase() => new FileSystemDatabase();
         

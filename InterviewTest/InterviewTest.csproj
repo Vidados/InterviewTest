@@ -122,14 +122,18 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\NewsletterController.cs" />
+    <Compile Include="Controllers\SettingsController.cs" />
     <Compile Include="Database\FileSystemDatabase.cs" />
     <Compile Include="Database\IPersistable.cs" />
     <Compile Include="Extensions\ArrayExtensions.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\SettingsHelper.cs" />
     <Compile Include="Models\EntityGenerator.cs" />
     <Compile Include="Models\Newsletter.cs" />
+    <Compile Include="Models\Settings.cs" />
+    <Compile Include="Models\Stats.cs" />
     <Compile Include="Models\Trip.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -153,6 +157,7 @@
     <Content Include="Scripts\modernizr-2.6.2.js" />
     <Content Include="Scripts\respond.js" />
     <Content Include="Scripts\respond.min.js" />
+    <Content Include="Scripts\app-settings.js" />
     <Content Include="Scripts\_references.js" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
@@ -171,6 +176,9 @@
     <Content Include="Views\Newsletter\HostItem.cshtml" />
     <Content Include="Views\Newsletter\List.cshtml" />
     <Content Include="Views\Home\Account.cshtml" />
+    <Content Include="Views\Settings\Config.cshtml" />
+    <Content Include="Views\Settings\New.cshtml" />
+    <Content Include="Views\Settings\Current.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

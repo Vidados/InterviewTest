@@ -14,5 +14,12 @@ namespace InterviewTest.Models
         public List<string> TripIds { get; set; }
         public List<string> HostIds { get; set; }  
         public DateTime CreatedAt { get; set; }
+        public string SettingsId { get; set; }
+    }
+
+    public enum NewsletterItem
+    {
+        Trip,
+        Host
     }
 }

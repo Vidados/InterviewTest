@@ -1,0 +1,27 @@
+﻿@using InterviewTest.Helpers
+@model InterviewTest.Controllers.NewSettingsViewModel
+
+<h2>New Config</h2>
+@using (Html.BeginForm("Save", "Settings", FormMethod.Post))
+{
+    <p><button type="submit" class="btn btn-default">Save</button></p>
+    <p>Here you can define the order and quantity of trips and hosts in each newsletter.</p>
+    <div class="row">
+        <div class="col-md-12">
+            <label>Number of items</label>&nbsp;@Html.DropDownListFor(m => m.Total, Model.ItemsAllowed, new { @onchange = "toggle(this)" })
+        </div>
+    </div>
+    <br />
+    <div class="row">
+        <div class="col-md-6" id="item-ph0"><label>1</label>&nbsp;@Html.DropDownListFor(m => m.Item1, Model.NewsletterItems)</div>
+        <div class="col-md-6" id="item-ph1"><label>2</label>&nbsp;@Html.DropDownListFor(m => m.Item2, Model.NewsletterItems)</div>
+        <div class="col-md-6" id="item-ph2"><label>3</label>&nbsp;@Html.DropDownListFor(m => m.Item3, Model.NewsletterItems)</div>
+        <div class="col-md-6" id="item-ph3"><label>4</label>&nbsp;@Html.DropDownListFor(m => m.Item4, Model.NewsletterItems)</div>
+        <div class="col-md-6" id="item-ph4"><label>5</label>&nbsp;@Html.DropDownListFor(m => m.Item5, Model.NewsletterItems)</div>
+        <div class="col-md-6" id="item-ph5"><label>6</label>&nbsp;@Html.DropDownListFor(m => m.Item6, Model.NewsletterItems)</div>
+        <div class="col-md-6" id="item-ph6"><label>7</label>&nbsp;@Html.DropDownListFor(m => m.Item7, Model.NewsletterItems)</div>
+        <div class="col-md-6" id="item-ph7"><label>8</label>&nbsp;@Html.DropDownListFor(m => m.Item8, Model.NewsletterItems)</div>
+        <div class="col-md-6" id="item-ph8"><label>9</label>&nbsp;@Html.DropDownListFor(m => m.Item9, Model.NewsletterItems)</div>
+        <div class="col-md-6" id="item-ph9"><label>10</label>&nbsp;@Html.DropDownListFor(m => m.Item10, Model.NewsletterItems)</div>
+    </div>
+}
