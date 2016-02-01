@@ -12,7 +12,8 @@ namespace InterviewTest.Controllers
         public ActionResult Index()
         {
             var db = GetDatabase();
-            var settings = SettingsHelper.GetSettings(db);
+
+            var settings = SettingsHelper.GetSettings();
 
             var viewModel = new SettingsViewModel()
             {

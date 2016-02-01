@@ -12,9 +12,8 @@ namespace InterviewTest.Controllers
         public ActionResult Create(int count)
         {
             var db = GetDatabase();
-
-            //use default layout if no settings have been defined yet
-            var settings = SettingsHelper.GetSettings(db);
+            
+            var settings = SettingsHelper.GetSettings();
             var totalHosts = settings.Layout.Count(x => x == NewsletterItem.Host);
             var totalTrips = settings.Layout.Count - totalHosts;
             var stats = db.GetAll<Stats>().LastOrDefault();
@@ -51,7 +50,7 @@ namespace InterviewTest.Controllers
             var db = GetDatabase();
 
             var newsletter = db.Get<Newsletter>(id);
-            var settings = SettingsHelper.GetSettings(db, newsletter.SettingsId);
+            var settings = db.Get<Settings>(newsletter.SettingsId);
 
             var viewModel = new NewsletterViewModel();
             var tidx = 0;
