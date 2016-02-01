@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using InterviewTest.Database;
 using InterviewTest.Models;
-using Microsoft.Ajax.Utilities;
+using InterviewTest.Helpers;
 
 namespace InterviewTest.Controllers
 {
@@ -23,10 +22,18 @@ namespace InterviewTest.Controllers
         {
             var database = GetDatabase();
 
+            //in order to guarantee that all newsletters have a persisted layout defined, the default layout will be stored in the database
+            var settings = new Settings() { Layout = SettingsHelper.GetDefaultLayout() };
+            database.Save(settings);
+
+            //whenever a new host or trip is created its stats are set to 0
+            var stats = database.GetAll<Stats>().LastOrDefault() ?? new Stats();
+
             for (int i = 0; i < 10; i++)
             {
                 var host = EntityGenerator.GenerateHost();
                 host.Id = i.ToString("00000");
+                stats.Hosts[host.Id] = 0;
                 database.Save(host);
             }
 
@@ -34,8 +41,11 @@ namespace InterviewTest.Controllers
             {
                 var trip = EntityGenerator.GenerateTrip(_random.Next(0, 10).ToString("00000"));
                 trip.Id = i.ToString("00000");
+                stats.Trips[trip.Id] = 0;
                 database.Save(trip);
             }
+
+            database.Save(stats);
 
             TempData["notification"] = "10 trips and 10 hosts created";
 

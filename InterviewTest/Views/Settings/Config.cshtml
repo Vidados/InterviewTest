@@ -1,0 +1,22 @@
+﻿@model InterviewTest.Controllers.SettingsViewModel
+
+@{
+    ViewBag.Title = "Settings";
+}
+
+<div class="jumbotron">
+    <h1>@ViewBag.Title</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="row">
+            @Html.Partial("New", Model.New)
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="row">
+            @Html.Partial("Current", Model.Current)
+        </div>
+    </div>
+</div>

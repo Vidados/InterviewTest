@@ -1,0 +1,18 @@
+﻿@using InterviewTest.Models
+@model InterviewTest.Controllers.CurrentSettingsViewModel
+
+<h2>Current Config</h2>
+<div class="row">
+    <div class="col-md-4">Total items: @Model.Total</div>
+    <div class="col-md-4">Trips: @Model.TotalTrips</div>
+    <div class="col-md-4">Hosts: @Model.TotalHosts</div>
+</div>
+<br/>
+<div class="row">
+    @foreach (var item in Model.Layout)
+    {
+    <div class="col-md-6">
+        @(item == NewsletterItem.Trip ? "Trip" : "Host")
+    </div>
+    }
+</div>
