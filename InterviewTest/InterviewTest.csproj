@@ -120,6 +120,7 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Controllers\ConfigController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\NewsletterController.cs" />
     <Compile Include="Database\FileSystemDatabase.cs" />
@@ -129,6 +130,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\EntityGenerator.cs" />
+    <Compile Include="Models\Config.cs" />
     <Compile Include="Models\Newsletter.cs" />
     <Compile Include="Models\Trip.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -171,6 +173,7 @@
     <Content Include="Views\Newsletter\HostItem.cshtml" />
     <Content Include="Views\Newsletter\List.cshtml" />
     <Content Include="Views\Home\Account.cshtml" />
+    <Content Include="Views\Config\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

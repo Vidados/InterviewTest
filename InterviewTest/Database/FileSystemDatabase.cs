@@ -55,7 +55,13 @@ namespace InterviewTest.Database
 
         public void DeleteAll<T>()
         {
-            Directory.Delete(GetFolder<T>(), true);
+            try {
+                Directory.Delete(GetFolder<T>(), true);
+            }
+            catch(DirectoryNotFoundException ex)
+            {
+                // TODO: handle ex
+            }
         }
 
         private T Deserialise<T>(string fqFilename)

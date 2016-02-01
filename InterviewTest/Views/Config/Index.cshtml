@@ -1,0 +1,24 @@
+﻿@model InterviewTest.Controllers.ConfigController
+
+<div class="jumbotron">
+    <h1>Vidados newsletter generation</h1>
+</div>
+<div class="row">
+        <h2>Configuration</h2>
+        <p>
+            @using (Html.BeginForm("create", "Config", FormMethod.Post))
+            {
+                <div class="alert alert-warning fade in" role="alert">
+                    To begin, please configure the content of the newsletter by adding Hosts and Trips as required.
+                </div>
+
+                <div class="form-group">
+                    <label>Format <input class="form-control" id="sequence" name="sequence" maxlength="10" /></label>
+                    <a class="btn btn-xs btn-primary" onclick="$('#sequence').val($('#sequence').val() + 'H');">Add Host</a>
+                    <a class="btn btn-xs btn-primary" onclick="$('#sequence').val($('#sequence').val() + 'T');">Add Trip</a>
+                    <a class="btn btn-xs btn-danger" onclick="$('#sequence').val('');">Clear</a>
+                </div>
+                <button class="btn btn-primary" type="submit">Save</button>
+            }
+        </p>
+</div>

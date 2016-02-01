@@ -15,15 +15,47 @@ namespace InterviewTest.Controllers
         {
             var db = GetDatabase();
 
-            var hostIds = db.GetAll<Host>().Select(h => h.Id).ToArray();
-            var tripIds = db.GetAll<Trip>().Select(t => t.Id).ToArray();
+            // load saved configuration
+            var sequence = "";
+            var configuredSequence = db.Get<Config>("00000");
 
+            // if no configuration found
+            if (configuredSequence == null)
+            {
+                TempData["notification"] = "You must configure a newsletter format first";
+                return RedirectToAction("list");
+            }
+
+            // if config found
+            sequence = configuredSequence.Sequence;
+
+            // eval amount of hosts/trips defined by user
+            int hostsCount = 0, tripCount = 0;
+            var newsletterContent = sequence.ToCharArray();
+            for (int i = 0; i < newsletterContent.Length; i++)
+            {
+                if (newsletterContent[i] == 'H') { hostsCount++; continue; }
+                if (newsletterContent[i] == 'T') { tripCount++; continue; }
+            }
+
+            // get hosts ordered by newsletter count
+            var hostIds = (from h in db.GetAll<Host>()
+                           orderby h.NewsletterCount
+                           select h.Id).Take(hostsCount).ToArray();
+
+            // get trips ordered by newsletter count
+            var tripIds = (from t in db.GetAll<Trip>()
+                           orderby t.NewsletterCount
+                           select t.Id).Take(tripCount).ToArray();
+
+            // add newsletters
             for (int i = 0; i < count; i++)
             {
                 var newsletter = new Newsletter()
                 {
-                    HostIds = Enumerable.Range(0, 2).Select(x => hostIds.GetRandom()).ToList(),
-                    TripIds = Enumerable.Range(0, 2).Select(x => tripIds.GetRandom()).ToList(),
+                    HostIds = hostIds.ToList(),
+                    TripIds = tripIds.ToList(),
+                    Sequence = newsletterContent
                 };
 
                 db.Save(newsletter);
@@ -46,15 +78,32 @@ namespace InterviewTest.Controllers
         public ActionResult Display(string id)
         {
             var db = GetDatabase();
-
             var newsletter = db.Get<Newsletter>(id);
 
-            var viewModel = new NewsletterViewModel
+            var viewModel = new NewsletterViewModel() { Items = new List<object>() };
+
+            // retrieve newsletter trips
+            var trips = newsletter.TripIds.Select(tid => Convert(db.Get<Trip>(tid))).Cast<object>();
+            int lastEvaluatedTripId = 0;
+
+            // retrieve newsletter hosts
+            var hosts = newsletter.HostIds.Select(hid => Convert(db.Get<Host>(hid))).Cast<object>();
+            int lastEvaluatedHostId = 0;
+
+            // evaluate sequence
+            for (int i = 0; i < newsletter.Sequence.Length; i++)
             {
-                Items = newsletter.TripIds.Select(tid => Convert(db.Get<Trip>(tid))).Cast<object>()
-                    .Union(newsletter.HostIds.Select(hid => Convert(db.Get<Host>(hid))))
-                    .ToList(),
-            };
+                if (newsletter.Sequence[i] == 'H') {
+                    viewModel.Items.Add(hosts.ElementAt(lastEvaluatedHostId));
+                    lastEvaluatedHostId++;
+                }
+                if (newsletter.Sequence[i] == 'T')
+                {
+                    viewModel.Items.Add(trips.ElementAt(lastEvaluatedTripId));
+                    lastEvaluatedTripId++;
+                }
+
+            }
 
             return View("Newsletter", viewModel);
         }
@@ -79,10 +128,26 @@ namespace InterviewTest.Controllers
         {
             var viewModel = new NewsletterListViewModel
             {
-                Newsletters = GetDatabase().GetAll<Newsletter>(),
+                Newsletters = GetDatabase().GetAll<Newsletter>()
             };
 
             return View(viewModel);
+        }
+
+        public ActionResult SaveConfiguration(string contentSequence)
+        {
+            var db = GetDatabase();
+            db.DeleteAll<Config>();
+
+            var config = new Config()
+            {
+                Id = "default",
+                Sequence = contentSequence
+            };
+
+            db.Save<Config>(config);
+
+            return RedirectToAction("list");
         }
 
         private NewsletterHostViewModel Convert(Host host) => new NewsletterHostViewModel

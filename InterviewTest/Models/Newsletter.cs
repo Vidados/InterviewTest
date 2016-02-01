@@ -12,7 +12,8 @@ namespace InterviewTest.Models
         }
         public string Id { get; set; }
         public List<string> TripIds { get; set; }
-        public List<string> HostIds { get; set; }  
+        public List<string> HostIds { get; set; }
+        public char[] Sequence { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }
