@@ -3,7 +3,6 @@ using System.Linq;
 using System.Web.Mvc;
 using InterviewTest.Database;
 using InterviewTest.Models;
-using InterviewTest.Helpers;
 
 namespace InterviewTest.Controllers
 {
@@ -13,10 +12,10 @@ namespace InterviewTest.Controllers
         {
             var db = GetDatabase();
             
-            var settings = SettingsHelper.GetSettings();
+            var settings = db.GetAll<Settings>().Last();
             var totalHosts = settings.Layout.Count(x => x == NewsletterItem.Host);
             var totalTrips = settings.Layout.Count - totalHosts;
-            var stats = db.GetAll<Stats>().LastOrDefault();
+            var stats = db.GetAll<Stats>().Last();
             
             for (int i = 0; i < count; i++)
             {
@@ -28,6 +27,9 @@ namespace InterviewTest.Controllers
                 };
 
                 db.Save(newsletter);
+
+                UpdateStats(stats, NewsletterItem.Host, newsletter.HostIds);
+                UpdateStats(stats, NewsletterItem.Trip, newsletter.TripIds);
                 db.Save(stats);
             }
 
@@ -117,11 +119,15 @@ namespace InterviewTest.Controllers
         private List<string> GetFairAllocation(Stats stats, NewsletterItem type, int total)
         {
             var featured = type == NewsletterItem.Trip ? stats.Trips : stats.Hosts;
-            var allocation = featured.OrderBy(x => x.Value).Select(x => x.Key).Take(total).ToList();
 
-            foreach(var id in allocation)
+            return featured.OrderBy(x => x.Value).Select(x => x.Key).Take(total).ToList();
+        }
+
+        private void UpdateStats(Stats stats, NewsletterItem type, List<string> ids)
+        {
+            foreach (var id in ids)
             {
-                if(type == NewsletterItem.Trip)
+                if (type == NewsletterItem.Trip)
                 {
                     stats.Trips[id]++;
                 }
@@ -130,8 +136,6 @@ namespace InterviewTest.Controllers
                     stats.Hosts[id]++;
                 }
             }
-
-            return allocation;
         }
 
         private FileSystemDatabase GetDatabase() => new FileSystemDatabase();

@@ -4,6 +4,7 @@ using System.Web;
 using System.Web.Mvc;
 using InterviewTest.Database;
 using InterviewTest.Models;
+using InterviewTest.Helpers;
 
 namespace InterviewTest.Controllers
 {
@@ -20,6 +21,10 @@ namespace InterviewTest.Controllers
         public ActionResult CreateTripsAndSellers()
         {
             var database = GetDatabase();
+
+            //in order to guarantee that all newsletters have a persisted layout defined, the default layout will be stored in the database
+            var settings = new Settings() { Layout = SettingsHelper.GetDefaultLayout() };
+            database.Save(settings);
 
             //whenever a new host or trip is created its stats are set to 0
             var stats = database.GetAll<Stats>().LastOrDefault() ?? new Stats();

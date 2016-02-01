@@ -13,7 +13,7 @@ namespace InterviewTest.Controllers
         {
             var db = GetDatabase();
 
-            var settings = SettingsHelper.GetSettings();
+            var settings = db.GetAll<Settings>().LastOrDefault() ?? new Settings() { Layout = SettingsHelper.GetDefaultLayout() };
 
             var viewModel = new SettingsViewModel()
             {
