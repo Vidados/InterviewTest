@@ -18,4 +18,10 @@ namespace InterviewTest.Models
         public string Job { get; set; }
         public string ImageUrl { get; set; }
     }
+
+    public class HostTripCount
+	{
+        public string ResourceId { get; set; }
+        public int Count { get; set; }
+    }
 }
