@@ -15,6 +15,7 @@
             {
                 <h2>Create newsletters</h2>
                 <label>How many <input type="number" name="count" value="10"/></label>
+                <label>Order and quantity of trips and hosts (eg. TTTHHTTT) <input type="text" name="newsletterFormat" value=@(Model.Settings == null ? "" : Model.Settings.NewsletterFormat)></label>
                 <button class="btn btn-default" type="submit">Create newsletters</button>
             }
         </div>

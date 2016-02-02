@@ -130,6 +130,7 @@
     </Compile>
     <Compile Include="Models\EntityGenerator.cs" />
     <Compile Include="Models\Newsletter.cs" />
+    <Compile Include="Models\NewsletterSettings.cs" />
     <Compile Include="Models\Trip.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
