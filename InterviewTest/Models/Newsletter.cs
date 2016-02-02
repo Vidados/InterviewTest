@@ -11,8 +11,8 @@ namespace InterviewTest.Models
             CreatedAt = DateTime.Now;
         }
         public string Id { get; set; }
-        public List<string> TripIds { get; set; }
-        public List<string> HostIds { get; set; }  
+        public string Format { get; set; }
+        public List<string> ResourceIds { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }

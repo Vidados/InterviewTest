@@ -11,7 +11,7 @@ namespace InterviewTest.Controllers
 {
     public class NewsletterController : Controller
     {
-        public ActionResult Create(int count)
+        public ActionResult Create(int count, string newsletterFormat)
         {
             var db = GetDatabase();
 
@@ -22,12 +22,34 @@ namespace InterviewTest.Controllers
             {
                 var newsletter = new Newsletter()
                 {
-                    HostIds = Enumerable.Range(0, 2).Select(x => hostIds.GetRandom()).ToList(),
-                    TripIds = Enumerable.Range(0, 2).Select(x => tripIds.GetRandom()).ToList(),
+                    Format = newsletterFormat,
+                    ResourceIds = new List<string>()
                 };
+
+                //look at each character in the format string, and if it's a T then get a random trip id, 
+                //otherwise if a H then get a random host id
+                foreach (char resourceType in newsletterFormat.ToUpper())
+                {
+                    if (resourceType == 'T')
+                    {
+                        newsletter.ResourceIds.Add(string.Format("T:{0}", tripIds.GetRandom()));
+                    }
+                    else if (resourceType == 'H')
+                    {
+                        newsletter.ResourceIds.Add(string.Format("H:{0}", hostIds.GetRandom()));
+                    }
+                }
 
                 db.Save(newsletter);
             }
+
+            //now save the format of the newsletter to the file system
+            var newsletterSettings = new NewsletterSettings()
+            {
+                Id = "Settings",
+                NewsletterFormat = newsletterFormat
+            };
+            db.Save(newsletterSettings);
 
             TempData["notification"] = $"Created {count} newsletters";
 
@@ -49,12 +71,20 @@ namespace InterviewTest.Controllers
 
             var newsletter = db.Get<Newsletter>(id);
 
-            var viewModel = new NewsletterViewModel
+            var viewModel = new NewsletterViewModel();
+            viewModel.Items = new List<object>();
+
+            foreach (string resourceId in newsletter.ResourceIds)
             {
-                Items = newsletter.TripIds.Select(tid => Convert(db.Get<Trip>(tid))).Cast<object>()
-                    .Union(newsletter.HostIds.Select(hid => Convert(db.Get<Host>(hid))))
-                    .ToList(),
-            };
+                if (resourceId.Substring(0,2) == "T:")
+                {
+                    viewModel.Items.Add(Convert(db.Get<Trip>(resourceId.Substring(2))));
+                }
+                else if (resourceId.Substring(0, 2) == "H:")
+                {
+                    viewModel.Items.Add(Convert(db.Get<Host>(resourceId.Substring(2))));
+                }
+            }
 
             return View("Newsletter", viewModel);
         }
@@ -80,6 +110,7 @@ namespace InterviewTest.Controllers
             var viewModel = new NewsletterListViewModel
             {
                 Newsletters = GetDatabase().GetAll<Newsletter>(),
+                Settings = GetDatabase().Get<NewsletterSettings>("Settings")
             };
 
             return View(viewModel);
@@ -128,5 +159,6 @@ namespace InterviewTest.Controllers
     public class NewsletterListViewModel
     {
         public List<Newsletter> Newsletters { get; set; }
+        public NewsletterSettings Settings { get; set; }
     }
 }
