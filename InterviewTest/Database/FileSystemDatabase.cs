@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace InterviewTest.Database
 {
-    public class FileSystemDatabase
+    public class FileSystemDatabase : IDatabase
     {
         public const string Root = @"c:\temp\VidadosDB";
 
@@ -55,7 +55,10 @@ namespace InterviewTest.Database
 
         public void DeleteAll<T>()
         {
-            Directory.Delete(GetFolder<T>(), true);
+            var folder = GetFolder<T>();
+
+            if (Directory.Exists(folder))
+                Directory.Delete(folder, true);
         }
 
         private T Deserialise<T>(string fqFilename)
