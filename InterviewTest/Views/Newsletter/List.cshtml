@@ -15,6 +15,8 @@
             {
                 <h2>Create newsletters</h2>
                 <label>How many <input type="number" name="count" value="10"/></label>
+                <label>Specification @Html.TextBoxFor(model => model.Specification,
+            new { name = "specification", placeholder = "Host=H,Trip=T", required = "required" })</label>
                 <button class="btn btn-default" type="submit">Create newsletters</button>
             }
         </div>

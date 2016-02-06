@@ -1,33 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using InterviewTest.Database;
-using InterviewTest.Extensions;
 using InterviewTest.Models;
+using InterviewTest.Commands;
+using InterviewTest.Services;
 
 namespace InterviewTest.Controllers
 {
     public class NewsletterController : Controller
     {
-        public ActionResult Create(int count)
+        private IDatabase _database;
+        private ICommandHandler<CreateNewsletterCommand> _createNewsletterCommandHandler;
+
+        public NewsletterController(
+            IDatabase database,
+            ICommandHandler<CreateNewsletterCommand> createNewsletterCommandHandler)
         {
-            var db = GetDatabase();
+            _database = database;
+            _createNewsletterCommandHandler = createNewsletterCommandHandler;
+        }
 
-            var hostIds = db.GetAll<Host>().Select(h => h.Id).ToArray();
-            var tripIds = db.GetAll<Trip>().Select(t => t.Id).ToArray();
+        public NewsletterController() : this(
+            new FileSystemDatabase(),
+            new CreateNewsletterCommandHandler(new FileSystemDatabase(), new NewsletterCompositionSpecificationParserService()))
+        {
+        }
 
-            for (int i = 0; i < count; i++)
+        public ActionResult Create(int count, string specification)
+        {
+            _createNewsletterCommandHandler.Handle(new CreateNewsletterCommand
             {
-                var newsletter = new Newsletter()
-                {
-                    HostIds = Enumerable.Range(0, 2).Select(x => hostIds.GetRandom()).ToList(),
-                    TripIds = Enumerable.Range(0, 2).Select(x => tripIds.GetRandom()).ToList(),
-                };
-
-                db.Save(newsletter);
-            }
+                Count = count,
+                Specification = specification
+            });
 
             TempData["notification"] = $"Created {count} newsletters";
 
@@ -36,7 +42,7 @@ namespace InterviewTest.Controllers
 
         public ActionResult DeleteAll()
         {
-            GetDatabase().DeleteAll<Newsletter>();
+            _database.DeleteAll<Newsletter>();
 
             TempData["notification"] = "All newsletters deleted";
 
@@ -45,15 +51,15 @@ namespace InterviewTest.Controllers
 
         public ActionResult Display(string id)
         {
-            var db = GetDatabase();
-
-            var newsletter = db.Get<Newsletter>(id);
+            var newsletter = _database.Get<Newsletter>(id);
 
             var viewModel = new NewsletterViewModel
             {
-                Items = newsletter.TripIds.Select(tid => Convert(db.Get<Trip>(tid))).Cast<object>()
-                    .Union(newsletter.HostIds.Select(hid => Convert(db.Get<Host>(hid))))
-                    .ToList(),
+                Items = (from item in newsletter.Items
+                        from itemId in item.Ids                        
+                        select item.Type == NewsletterItemType.Host
+                            ? (object)Convert(_database.Get<Host>(itemId))
+                            : Convert(_database.Get<Trip>(itemId))).ToList()
             };
 
             return View("Newsletter", viewModel);
@@ -77,9 +83,11 @@ namespace InterviewTest.Controllers
 
         public ActionResult List()
         {
+            var specification = (_database.GetAll<NewsletterCompositionSpecification>().FirstOrDefault()?.ToString()) ?? "HHHTTHHH";
             var viewModel = new NewsletterListViewModel
             {
-                Newsletters = GetDatabase().GetAll<Newsletter>(),
+                Specification = specification,
+                Newsletters = _database.GetAll<Newsletter>(),
             };
 
             return View(viewModel);
@@ -96,12 +104,10 @@ namespace InterviewTest.Controllers
         {
             Name = trip.Name,
             Country = trip.Country,
-            HostName = hostName ?? GetDatabase().Get<Host>(trip.HostId)?.Name,
+            HostName = hostName ?? _database.Get<Host>(trip.HostId)?.Name,
             ImageUrl = trip.ImageUrl,
         };
 
-        private FileSystemDatabase GetDatabase() => new FileSystemDatabase();
-        
     }
 
     public class NewsletterViewModel
@@ -127,6 +133,7 @@ namespace InterviewTest.Controllers
 
     public class NewsletterListViewModel
     {
+        public string Specification { get; set; }
         public List<Newsletter> Newsletters { get; set; }
     }
 }
