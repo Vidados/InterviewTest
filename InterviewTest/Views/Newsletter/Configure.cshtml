@@ -1,0 +1,39 @@
+﻿
+@{
+    ViewBag.Title = "Configure";
+}
+
+<div class="jumbotron">
+    <h1>Vidados newsletter configuration</h1>
+</div>
+
+
+<div class="col-sm-8" data-ng-app="app" data-ng-controller="configCtrl as vm">
+    <form data-ng-submit="vm.saveConfig()"> 
+        <div class="row">
+            <button type="button" class="btn btn-primary" data-ng-click="vm.addConfigItem()">Add Newsletter Item</button>
+            <h4>Numer of elements in newsletter: {{vm.items.length}}</h4>
+        </div>
+        <div class="row config" data-ng-repeat="item in vm.items">
+            <div class="input-group config-select">
+                <span class="input-group-btn">
+                    <button class="btn btn-danger remove" type="button" data-ng-click="vm.removeItem(item)" data-ng-disabled="vm.items.indexOf(item) == 0">
+                        <span class="glyphicon glyphicon-remove"></span>
+                    </button>
+                </span>
+                <select class="form-control" data-ng-model="vm.selectedValues[vm.items.indexOf(item)]" required>
+                    <option data-ng-repeat="option in item" value="{{option.id}}">{{option.value}}</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <button type="submit" class="btn btn-default" data-ng-disabled="vm.selectedValues.length !== vm.items.length">Save Configuration</button>
+            <button type="button" class="btn btn-warn" data-ng-click="vm.reset()">Reset Configuration</button>
+        </div>
+    </form>
+</div>
+
+@section scripts{
+    @Scripts.Render("~/bundles/angular")
+}

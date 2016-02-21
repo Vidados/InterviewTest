@@ -26,6 +26,13 @@ namespace InterviewTest
             bundles.Add(new StyleBundle("~/Content/css").Include(
                       "~/Content/bootstrap.css",
                       "~/Content/site.css"));
+
+            bundles.Add(new ScriptBundle("~/bundles/angular").Include(
+                    "~/Scripts/angular.min.js",
+                    "~/Scripts/app/app.js",
+                    "~/Scripts/app/controllers/configurationController.js",
+                    "~/Scripts/app/services/configurationService.js"
+                ));
         }
     }
 }

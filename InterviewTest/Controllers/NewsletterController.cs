@@ -1,33 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Web;
 using System.Web.Mvc;
 using InterviewTest.Database;
-using InterviewTest.Extensions;
 using InterviewTest.Models;
+using InterviewTest.Services;
 
 namespace InterviewTest.Controllers
 {
     public class NewsletterController : Controller
     {
+        private readonly char _hostsToken = 'H';
+        private readonly char _tripsToken = 'T';
+
         public ActionResult Create(int count)
         {
             var db = GetDatabase();
 
-            var hostIds = db.GetAll<Host>().Select(h => h.Id).ToArray();
-            var tripIds = db.GetAll<Trip>().Select(t => t.Id).ToArray();
-
-            for (int i = 0; i < count; i++)
-            {
-                var newsletter = new Newsletter()
-                {
-                    HostIds = Enumerable.Range(0, 2).Select(x => hostIds.GetRandom()).ToList(),
-                    TripIds = Enumerable.Range(0, 2).Select(x => tripIds.GetRandom()).ToList(),
-                };
-
-                db.Save(newsletter);
-            }
+            NewsletterService nService = new NewsletterService(db);
+            nService.SaveNewsletters(_hostsToken, _tripsToken, count);
 
             TempData["notification"] = $"Created {count} newsletters";
 
@@ -48,29 +38,17 @@ namespace InterviewTest.Controllers
             var db = GetDatabase();
 
             var newsletter = db.Get<Newsletter>(id);
+            var newsletterVmService = new NewsletterVmService(db);
 
-            var viewModel = new NewsletterViewModel
-            {
-                Items = newsletter.TripIds.Select(tid => Convert(db.Get<Trip>(tid))).Cast<object>()
-                    .Union(newsletter.HostIds.Select(hid => Convert(db.Get<Host>(hid))))
-                    .ToList(),
-            };
+            var viewModel = newsletterVmService.GetNewsletterViewModel(newsletter);
 
             return View("Newsletter", viewModel);
         }
 
         public ActionResult Sample()
         {
-            var viewModel = new NewsletterViewModel()
-            {
-                Items =
-                {
-                    Convert(EntityGenerator.GenerateHost()),
-                    Convert(EntityGenerator.GenerateTrip(null), "Test host name"),
-                    Convert(EntityGenerator.GenerateTrip(null), "Test host name"),
-                    Convert(EntityGenerator.GenerateHost()),
-                }
-            };
+            var newsletterService = new NewsletterVmService(GetDatabase());
+            var viewModel = newsletterService.GetSampleNewsletter();
 
             return View("Newsletter", viewModel);
         }
@@ -81,27 +59,31 @@ namespace InterviewTest.Controllers
             {
                 Newsletters = GetDatabase().GetAll<Newsletter>(),
             };
+            ViewBag.Config = GetDatabase().GetAll<ConfigModel>() != null
+                ? GetDatabase().GetAll<ConfigModel>().OrderByDescending(x => x.Id).First().ToString()
+                : null;
 
             return View(viewModel);
         }
 
-        private NewsletterHostViewModel Convert(Host host) => new NewsletterHostViewModel
+        public ActionResult Configure()
         {
-            Name = host.Name,
-            ImageUrl = host.ImageUrl,
-            Job = host.Job,
-        };
-        
-        private NewsletterTripViewModel Convert(Trip trip, string hostName = null) => new NewsletterTripViewModel
-        {
-            Name = trip.Name,
-            Country = trip.Country,
-            HostName = hostName ?? GetDatabase().Get<Host>(trip.HostId)?.Name,
-            ImageUrl = trip.ImageUrl,
-        };
+            return View();
+        }
 
-        private FileSystemDatabase GetDatabase() => new FileSystemDatabase();
+        [HttpPost]
+        public ActionResult Configure(ConfigModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                GetDatabase().Save(model);
+
+                return Json(new {success = "true"});
+            }
+            return Json(new { success = "false" });
+        }
         
+        private FileSystemDatabase GetDatabase() => new FileSystemDatabase();
     }
 
     public class NewsletterViewModel

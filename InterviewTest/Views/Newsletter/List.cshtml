@@ -46,6 +46,13 @@
             {
                 <button type="submit" class="btn btn-default">Delete</button>
             }
+
+            <h2>Configure newsletter</h2>
+            @if (ViewBag.Config != null)
+            {
+                <h4>Current configuration: @ViewBag.Config (T = Trip, H = Host)</h4>
+            }
+            <a href="@Url.Action("Configure")" class="btn btn-default">Configure</a>
         </div>
 
     }

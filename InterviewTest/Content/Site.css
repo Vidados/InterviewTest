@@ -29,3 +29,7 @@ textarea {
     height: auto;
     min-height: 0;
 }
+
+.config {
+    padding: 15px 0;
+}
