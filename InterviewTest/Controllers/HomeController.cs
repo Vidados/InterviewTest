@@ -27,6 +27,7 @@ namespace InterviewTest.Controllers
             {
                 var host = EntityGenerator.GenerateHost();
                 host.Id = i.ToString("00000");
+                host.NumberOfTimesUsed = 0;
                 database.Save(host);
             }
 
@@ -34,6 +35,7 @@ namespace InterviewTest.Controllers
             {
                 var trip = EntityGenerator.GenerateTrip(_random.Next(0, 10).ToString("00000"));
                 trip.Id = i.ToString("00000");
+                trip.NumberOfTimesUsed = 0;
                 database.Save(trip);
             }
 

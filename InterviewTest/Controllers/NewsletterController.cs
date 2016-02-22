@@ -16,9 +16,6 @@ namespace InterviewTest.Controllers
         {
             var db = GetDatabase();
 
-            var hostIds = db.GetAll<Host>().Select(h => h.Id).ToArray();
-            var tripIds = db.GetAll<Trip>().Select(t => t.Id).ToArray();
-
             var cleanNewsLetterFormat = Regex.Replace(newsLetterFormat.ToUpper(), "[^HT]", "");
 
             var numOfHosts = cleanNewsLetterFormat.Count(x => x == Constants.HostIdentifier);
@@ -28,8 +25,8 @@ namespace InterviewTest.Controllers
             {
                 var newsletter = new Newsletter()
                 {
-                    HostIds = Enumerable.Range(0, numOfHosts).Select(x => hostIds.GetRandom()).ToList(),
-                    TripIds = Enumerable.Range(0, numOfTrips).Select(x => tripIds.GetRandom()).ToList(),
+                    HostIds = ReturnHostIdAndUpdateCounts(numOfHosts),
+                    TripIds = ReturnTripIdAndUpdateCounts(numOfTrips),
                     NewsLetterFormat = cleanNewsLetterFormat
                 };
 
@@ -121,6 +118,40 @@ namespace InterviewTest.Controllers
                 : setting.Value;
 
             return View(viewModel);
+        }
+
+        private List<string> ReturnHostIdAndUpdateCounts(int count)
+        {
+            var db = GetDatabase();
+            var hosts = db.GetAll<Host>().OrderBy(x => x.NumberOfTimesUsed).ToList();
+
+            var result = new List<string>();
+            for (var i = 0; i < count; i++)
+            {
+                result.Add(hosts[i].Id);
+
+                hosts[i].NumberOfTimesUsed ++;
+                db.Save(hosts[i]);
+            }
+
+            return result;
+        }
+
+        private List<string> ReturnTripIdAndUpdateCounts(int count)
+        {
+            var db = GetDatabase();
+            var trips = db.GetAll<Trip>().OrderBy(x => x.NumberOfTimesUsed).ToList();
+
+            var result = new List<string>();
+            for (var i = 0; i < count; i++)
+            {
+                result.Add(trips[i].Id);
+
+                trips[i].NumberOfTimesUsed++;
+                db.Save(trips[i]);
+            }
+
+            return result;
         }
 
         private NewsletterHostViewModel Convert(Host host) => new NewsletterHostViewModel
