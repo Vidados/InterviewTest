@@ -19,7 +19,7 @@ namespace InterviewTest.Services
 
         public void SaveNewsletters(char hostsToken, char tripsToken, int count)
         {
-            var newsletters = GetNewsletters(GetHostsOrderedList(_db), GetTripsOrderedList(_db), hostsToken, tripsToken, count);
+            var newsletters = GetNewsletters(GetHostsOrderedDict(_db), GetTripsOrderedDict(_db), hostsToken, tripsToken, count);
 
             foreach (var newsletter in newsletters)
             {
@@ -27,11 +27,11 @@ namespace InterviewTest.Services
             }
         }
 
-        public List<Newsletter> GetNewsletters(IEnumerable<string> hostsList, IEnumerable<string> tripsList, char hostsToken, char tripsToken, int count)
+        public List<Newsletter> GetNewsletters(Dictionary<string,int> hostsList, Dictionary<string, int> tripsList, char hostsToken, char tripsToken, int count)
         {
             var newsletters = new List<Newsletter>();
-            var hostIds = GetHostsOrderedList(_db);
-            var tripIds = GetTripsOrderedList(_db);
+            var hostsDict = GetHostsOrderedDict(_db);
+            var tripsDict = GetTripsOrderedDict(_db);
             var config = _db.GetAll<ConfigModel>().OrderByDescending(x => x.Id).FirstOrDefault() ??
                          CreateAndSaveDefaultConfig(_db);
 
@@ -42,17 +42,29 @@ namespace InterviewTest.Services
             {
                 var newsletter = new Newsletter
                 {
-                    HostIds = hostIds.Take(noHosts).ToList(),
-                    TripIds = tripIds.Take(noTrips).ToList(),
+                    HostIds = hostsDict.Keys.Take(noHosts).ToList(),
+                    TripIds = tripsDict.Keys.Take(noTrips).ToList(),
                     ConfigId = config.Id
                 };
+                hostsDict = UpdateSourceDict(hostsDict, noHosts);
+                tripsDict = UpdateSourceDict(tripsDict, noTrips);
 
                 newsletters.Add(newsletter);
             }
             return newsletters;
         }
 
-        public IEnumerable<string> GetHostsOrderedList(FileSystemDatabase db)
+        private Dictionary<string, int> UpdateSourceDict(Dictionary<string, int> sourceDict, int noOfUpdatedItems)
+        {
+            for (var i = 0; i < noOfUpdatedItems; i++)
+            {
+                sourceDict[sourceDict.Keys.ElementAt(i)] += 1;
+            }
+
+            return sourceDict.OrderBy(x => x.Value).ToDictionary(pair => pair.Key, pair => pair.Value);
+        }
+
+        public Dictionary<string, int> GetHostsOrderedDict(FileSystemDatabase db)
         {
             var newsletters = db.GetAll<Newsletter>();
             var hostsDict = new Dictionary<string, int>();
@@ -68,10 +80,10 @@ namespace InterviewTest.Services
             var allMissingHosts = db.GetAll<Host>().Where(h => !hostsDict.ContainsKey(h.Id));
             allMissingHosts.ForEach(h => hostsDict[h.Id] = 0);
 
-            return hostsDict.OrderBy(x => x.Value).Select(x => x.Key);
+            return hostsDict.OrderBy(x => x.Value).ToDictionary(pair => pair.Key, pair => pair.Value); ;
         }
 
-        public IEnumerable<string> GetTripsOrderedList(FileSystemDatabase db)
+        public Dictionary<string,int> GetTripsOrderedDict(FileSystemDatabase db)
         {
             var newsletters = db.GetAll<Newsletter>();
             var dict = new Dictionary<string, int>();
@@ -87,7 +99,7 @@ namespace InterviewTest.Services
             var allMissingTrips = db.GetAll<Host>().Where(h => !dict.ContainsKey(h.Id));
             allMissingTrips.ForEach(h => dict[h.Id] = 0);
 
-            return dict.OrderBy(x => x.Value).Select(x => x.Key);
+            return dict.OrderBy(x => x.Value).ToDictionary(pair => pair.Key, pair => pair.Value); ;
         }
 
         private void UpdateDict(Dictionary<string, int> hostsDict, string hostId)

@@ -23,8 +23,8 @@ namespace InterviewTest.Tests.Services
         [Test]
         public void ShouldGetNewsletters()
         {
-            var harr = _serv.GetHostsOrderedList(_db).ToList();
-            var tarr = _serv.GetTripsOrderedList(_db).ToList();
+            var harr = _serv.GetHostsOrderedDict(_db);
+            var tarr = _serv.GetTripsOrderedDict(_db);
             var nl = _serv.GetNewsletters(harr, tarr, 'H', 'T', 1).FirstOrDefault();
             var config = _db.Get<ConfigModel>(nl.ConfigId);
 
@@ -35,13 +35,13 @@ namespace InterviewTest.Tests.Services
             {
                 if (token.Equals('H'))
                 {
-                    Assert.That(nl.HostIds.Contains(harr.First()));
-                    harr.Remove(harr.First());
+                    Assert.That(nl.HostIds.Contains(harr.Keys.First()));
+                    harr.Remove(harr.Keys.First());
                 }
                 if (token.Equals('T'))
                 {
-                    Assert.That(nl.TripIds.Contains(tarr.First()));
-                    tarr.Remove(tarr.First());
+                    Assert.That(nl.TripIds.Contains(tarr.Keys.First()));
+                    tarr.Remove(tarr.Keys.First());
                 }
             }
             
