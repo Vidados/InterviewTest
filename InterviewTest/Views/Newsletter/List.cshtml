@@ -14,9 +14,9 @@
             @using (Html.BeginForm("create", "Newsletter", FormMethod.Post))
             {
                 <h2>Create newsletters</h2>
-                <label>How many <input type="number" name="count" value="10"/></label><br />
-                <label>Newsletter Format <input type="text" name="newsLetterFormat" value="@ViewBag.NewsLetterFormat" /></label><br />
-                <button class="btn btn-default" type="submit">Create newsletters</button>
+                <label>How many <input type="number" id="txtNumberOfNewsletters" name="count" value="10"/></label><br />
+                <label>Newsletter Format <input id="txtNewsLetterFormat" type="text" name="newsLetterFormat" value="@ViewBag.NewsLetterFormat" /></label><br />
+                <button onclick="return validateSubmit();" class="btn btn-default" type="submit">Create newsletters</button>
             }
         </div>
         <div class="row">
