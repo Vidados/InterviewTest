@@ -120,6 +120,7 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Models\Constants.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\NewsletterController.cs" />
     <Compile Include="Database\FileSystemDatabase.cs" />
@@ -130,6 +131,7 @@
     </Compile>
     <Compile Include="Models\EntityGenerator.cs" />
     <Compile Include="Models\Newsletter.cs" />
+    <Compile Include="Models\Settings.cs" />
     <Compile Include="Models\Trip.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
