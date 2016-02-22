@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Mvc;
 using InterviewTest.Database;
@@ -11,23 +12,38 @@ namespace InterviewTest.Controllers
 {
     public class NewsletterController : Controller
     {
-        public ActionResult Create(int count)
+        public ActionResult Create(int count, string newsLetterFormat)
         {
             var db = GetDatabase();
 
             var hostIds = db.GetAll<Host>().Select(h => h.Id).ToArray();
             var tripIds = db.GetAll<Trip>().Select(t => t.Id).ToArray();
 
-            for (int i = 0; i < count; i++)
+            var cleanNewsLetterFormat = Regex.Replace(newsLetterFormat.ToUpper(), "[^HT]", "");
+
+            var numOfHosts = cleanNewsLetterFormat.Count(x => x == Constants.HostIdentifier);
+            var numOfTrips = cleanNewsLetterFormat.Count(x => x == Constants.TripIdentifier);
+
+            for (var i = 0; i < count; i++)
             {
                 var newsletter = new Newsletter()
                 {
-                    HostIds = Enumerable.Range(0, 2).Select(x => hostIds.GetRandom()).ToList(),
-                    TripIds = Enumerable.Range(0, 2).Select(x => tripIds.GetRandom()).ToList(),
+                    HostIds = Enumerable.Range(0, numOfHosts).Select(x => hostIds.GetRandom()).ToList(),
+                    TripIds = Enumerable.Range(0, numOfTrips).Select(x => tripIds.GetRandom()).ToList(),
+                    NewsLetterFormat = cleanNewsLetterFormat
                 };
 
                 db.Save(newsletter);
             }
+
+            // Updating the setting for the News Letter Format
+            var setting = 
+                db.GetAll<Settings>()
+                    .FirstOrDefault(x => x.Key == Constants.SettingKeys.NewsLetterFormatKey) ??
+                          new Settings(Constants.SettingKeys.NewsLetterFormatKey);
+
+            setting.Value = cleanNewsLetterFormat;
+            db.Save(setting);
 
             TempData["notification"] = $"Created {count} newsletters";
 
@@ -51,10 +67,24 @@ namespace InterviewTest.Controllers
 
             var viewModel = new NewsletterViewModel
             {
-                Items = newsletter.TripIds.Select(tid => Convert(db.Get<Trip>(tid))).Cast<object>()
-                    .Union(newsletter.HostIds.Select(hid => Convert(db.Get<Host>(hid))))
-                    .ToList(),
+                NewsLetterFormat = newsletter.NewsLetterFormat
             };
+
+            var hostCount = 0;
+            var tripCount = 0;
+            foreach (var c in newsletter.NewsLetterFormat)
+            {
+                switch (c)
+                {
+                    case Constants.HostIdentifier:
+                        viewModel.Items.Add(Convert(db.Get<Host>(newsletter.HostIds[hostCount++])) as object);
+                        break;
+
+                    case Constants.TripIdentifier:
+                        viewModel.Items.Add(Convert(db.Get<Trip>(newsletter.TripIds[tripCount++])) as object);
+                        break;
+                }
+            }
 
             return View("Newsletter", viewModel);
         }
@@ -82,6 +112,14 @@ namespace InterviewTest.Controllers
                 Newsletters = GetDatabase().GetAll<Newsletter>(),
             };
 
+            var db = GetDatabase();
+            var setting = db.GetAll<Settings>()
+                .FirstOrDefault(x => x.Key == Constants.SettingKeys.NewsLetterFormatKey);
+
+            ViewBag.NewsLetterFormat = setting == null 
+                ? Constants.DefaultInitValues[Constants.SettingKeys.NewsLetterFormatKey] 
+                : setting.Value;
+
             return View(viewModel);
         }
 
@@ -97,7 +135,7 @@ namespace InterviewTest.Controllers
             Name = trip.Name,
             Country = trip.Country,
             HostName = hostName ?? GetDatabase().Get<Host>(trip.HostId)?.Name,
-            ImageUrl = trip.ImageUrl,
+            ImageUrl = trip.ImageUrl
         };
 
         private FileSystemDatabase GetDatabase() => new FileSystemDatabase();
@@ -106,6 +144,7 @@ namespace InterviewTest.Controllers
 
     public class NewsletterViewModel
     {
+        public string NewsLetterFormat { get; set; }
         public List<object> Items { get; set; } = new List<object>();
     }
 
@@ -115,7 +154,7 @@ namespace InterviewTest.Controllers
         public decimal Price { get; set; }
         public string Country { get; set; }
         public string HostName { get; set; }
-        public string ImageUrl { get; set; }
+        public string ImageUrl { get; set; }        
     }
 
     public class NewsletterHostViewModel
