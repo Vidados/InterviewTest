@@ -13,6 +13,7 @@ namespace InterviewTest.Models
         public string Id { get; set; }
         public List<string> TripIds { get; set; }
         public List<string> HostIds { get; set; }  
+        public string NewsLetterFormat { get; set; }
         public DateTime CreatedAt { get; set; }
     }
 }
